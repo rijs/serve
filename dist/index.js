@@ -14,10 +14,10 @@ function serve(opts) {
   if (client) {
     return identity;
   }var app = expressify(opts.server || opts);
-  app.use("/ripple.js", send("js"));
-  app.use("/ripple.min.js", send("min.js"));
-  app.use("/ripple.pure.js", send("pure.js"));
-  app.use("/ripple.pure.min.js", send("pure.min.js"));
+  app.use("/ripple.js", send(local("js")));
+  app.use("/ripple.min.js", send(local("min.js")));
+  app.use("/ripple.pure.js", send(local("pure.js")));
+  app.use("/ripple.pure.min.js", send(local("pure.min.js")));
   return opts;
 }
 
@@ -25,10 +25,8 @@ function expressify(d) {
   return key("_events.request")(d) || { use: noop };
 }
 
-function send(ext) {
-  return function (req, res) {
-    res.sendFile(path.resolve(__dirname, "../node_modules/ripple/dist/ripple." + ext));
-  };
+function local(ext) {
+  return resolve(require.resolve("ripple"), "../ripple." + ext);
 }
 
 var identity = _interopRequire(require("utilise/identity"));
@@ -37,10 +35,12 @@ var client = _interopRequire(require("utilise/client"));
 
 var noop = _interopRequire(require("utilise/noop"));
 
+var send = _interopRequire(require("utilise/send"));
+
 var key = _interopRequire(require("utilise/key"));
 
 var log = _interopRequire(require("utilise/log"));
 
-var path = _interopRequire(require("path"));
+var resolve = require("path").resolve;
 
 log = log("[ri/serve]");
