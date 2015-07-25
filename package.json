@@ -28,5 +28,6 @@
   },
   "dependencies": {
     "utilise": "git://github.com/utilise/utilise"
+  , "ripple": "git://github.com/pemrouz/ripple"
   }
 }
