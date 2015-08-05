@@ -7,7 +7,11 @@ var expect  = require('chai').expect
   , serve   = require('./')(server)
 
 describe('Serve Client', function() {
-    
+  
+  it('should pass over serverless node', function(){  
+    require('./')()
+  })
+
   it('should serve client', function(done){  
     request(app)
       .get('/ripple.js')

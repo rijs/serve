@@ -13,6 +13,8 @@ function serve(opts) {
 
   if (client) {
     return identity;
+  }if (!opts) {
+    return;
   }var app = expressify(opts.server || opts);
   app.use("/ripple.js", send(local("js")));
   app.use("/ripple.min.js", send(local("min.js")));
