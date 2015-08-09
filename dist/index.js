@@ -28,7 +28,7 @@ function expressify(d) {
 }
 
 function local(ext) {
-  return resolve(require.resolve("rijs"), "../ripple." + ext);
+  return resolve(__dirname, "./ripple." + ext);
 }
 
 var identity = _interopRequire(require("utilise/identity"));

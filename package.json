@@ -9,7 +9,8 @@
     "babel": "babel src -d dist",
     "bundle": "cp ./node_modules/utilise/identity.js dist/client.js",
     "minify": "uglifyjs dist/client.js -m -c drop_console,dead_code -d debug=false -o dist/client.min.js",
-    "build": "npm run babel && npm run ignore && npm run bundle && npm run minify",
+    "copy": "cp ./node_modules/rijs/dist/ripple* ./dist",
+    "build": "npm run babel && npm run ignore && npm run bundle && npm run minify && npm run copy",
     "test": "istanbul test ./node_modules/mocha/bin/_mocha --report html -- -R spec",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && rm -rf ./coverage"
   },

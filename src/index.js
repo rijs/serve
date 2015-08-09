@@ -19,7 +19,7 @@ function expressify(d) {
 }
 
 function local(ext){
-  return resolve(require.resolve('rijs'), '../ripple.' + ext)
+  return resolve(__dirname, './ripple.' + ext)
 }
 
 import identity from 'utilise/identity'
