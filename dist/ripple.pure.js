@@ -48,7 +48,7 @@ function draw(ripple) {
 function everything(ripple) {
   var selector = values(ripple.resources).filter(header("content-type", "application/javascript")).map(key("name")).join(",");
 
-  return all(selector).map(invoke(ripple));
+  return !selector ? [] : all(selector).map(invoke(ripple));
 }
 
 // render all elements that depend on the resource
@@ -313,11 +313,14 @@ module.exports = function first(d){
   return d[0]
 }
 },{}],13:[function(require,module,exports){
+var is = require('utilise/is')  
+
 module.exports = function flatten(p,v){ 
+  is.arr(v) && (v = v.reduce(flatten, []))
   return (p = p || []), p.concat(v) 
 }
 
-},{}],14:[function(require,module,exports){
+},{"utilise/is":19}],14:[function(require,module,exports){
 var datum = require('utilise/datum')
   , key = require('utilise/key')
 
@@ -635,13 +638,14 @@ function register(ripple) {
     var _ref$headers = _ref.headers;
     var headers = _ref$headers === undefined ? {} : _ref$headers;
 
-    if (!name) return err("cannot register nameless resource");
+    if (!name) return (err("cannot register nameless resource"), false);
     log("registering", name);
-    var res = normalise(ripple)({ name: name, body: body, headers: headers });
+    var res = normalise(ripple)({ name: name, body: body, headers: headers }),
+        type = !ripple.resources[name] ? "load" : "";
 
     if (!res) return (err("failed to register", name), false);
     ripple.resources[name] = res;
-    ripple.emit("change", [ripple.resources[name]]);
+    ripple.emit("change", [ripple.resources[name], { type: type }]);
     return ripple.resources[name].body;
   };
 }
@@ -649,14 +653,16 @@ function register(ripple) {
 function normalise(ripple) {
   return function (res) {
     if (!header("content-type")(res)) values(ripple.types).some(contentType(res));
-    if (!header("content-type")(res)) return (err("could not understand", res), false);
+    if (!header("content-type")(res)) return (err("could not understand resource", res), false);
     return parse(ripple)(res);
   };
 }
 
 function parse(ripple) {
   return function (res) {
-    return ((ripple.types[header("content-type")(res)] || {}).parse || identity)(res);
+    var type = header("content-type")(res);
+    if (!ripple.types[type]) return (err("could not understand type", type), false);
+    return (ripple.types[type].parse || identity)(res);
   };
 }
 
@@ -863,9 +869,10 @@ module.exports = function emitterify(body) {
 
   function invoke(o, k, p){
     if (!o[k]) return
-    try { o[k].apply(body, p) } catch(e) { err(e, e.stack)  }
+    var fn = o[k]
     o[k].once && (isFinite(k) ? o.splice(k, 1) : delete o[k])
-  }
+    try { fn.apply(body, p) } catch(e) { err(e, e.stack)  }
+   }
 
   function on(type, callback) {
     var ns = type.split('.')[1]
@@ -940,8 +947,8 @@ function delay(ripple) {
   var render = ripple.render;
 
   ripple.render = function (el) {
-    var delay = attr(el, "delay");
-    return delay != null ? (el.setAttribute("inert", ""), el.removeAttribute("delay"), setTimeout(el.removeAttribute.bind(el, "inert"), +delay)) : render.apply(this, arguments);
+    var delay = attr("delay")(el);
+    return delay != null ? (el.setAttribute("inert", ""), el.removeAttribute("delay"), setTimeout(el.removeAttribute.bind(el, "inert"), +delay)) : render(el);
   };
 
   return ripple;
@@ -1255,45 +1262,60 @@ function precss(ripple) {
         prefix = "",
         noShadow = !el.shadowRoot || !document.head.createShadowRoot;
 
-    // this el does not have a css dep
-    if (!css) return render.apply(this, arguments);
+    // this el does not have a css dep, continue with rest of rendering pipeline
+    if (!css) return render(el);
 
-    // this el has a css dep, but it is not loaded yet
+    // this el has a css dep, but it is not loaded yet - stop rendering this el
     if (css && !ripple.resources[css]) return;
 
-    // this el does not have a shadow and css has already been added
-    if (noShadow && all("style[resource=\"" + css + "\"]").length) return render.apply(this, arguments);
+    // this el does not have a shadow and css has already been added, so reuse that
+    if (noShadow && raw("style[resource=\"" + css + "\"]")) style = raw("style[resource=\"" + css + "\"]");
 
-    style = raw("style", root) || document.createElement("style");
+    // reuse or create style tag
+    style = style || raw("style", root) || document.createElement("style");
+
+    // mark tag if no shadow for optimisation
+    attr(style, "resource", noShadow ? css : false);
+
+    // retrieve styles
     styles = ripple(css);
 
     // scope css if no shadow
-    if (noShadow) {
-      prefix = attr(el, "is") ? "[is=\"" + attr(el, "is") + "\"]" : el.tagName.toLowerCase();
-      styles = polyfill(styles, prefix);
-    }
+    if (noShadow) styles = polyfill(styles, el);
 
+    // update styles
     style.innerHTML = styles;
-    attr(style, "resource", noShadow ? css : false);
-    root.insertBefore(style, root.firstChild);
-    render.apply(this, arguments);
+
+    // append if not already attached
+    if (!style.parentNode) root.insertBefore(style, root.firstChild);
+
+    // continue with rest of the rendering pipeline
+    render(el);
   };
 
   return ripple;
 }
 
-function polyfill(css, prefix) {
-  var escaped = prefix.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
+function polyfill(css, el) {
+  var prefix = attr(el, "is") ? "[is=\"" + attr(el, "is") + "\"]" : el.tagName.toLowerCase(),
+      escaped = prefix.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
 
   return !prefix ? css : css.replace(/:host\((.+)\)/gi, function ($1, $2) {
     return prefix + $2;
-  }).replace(/:host/gi, prefix).replace(/^(.+)[{]/gim, function ($1) {
+  }) // :host(...) -> tag...
+  .replace(/:host/gi, prefix) // :host      -> tag
+  .replace(/^([^@%]*)[{]/gi, function ($1) {
     return prefix + " " + $1;
-  }).replace(/^(.+)(^[:])[,]/gim, function ($1) {
+  }) // ... {      -> tag ... {
+  .replace(/^([^:]*)[,]/gi, function ($1) {
     return prefix + " " + $1;
-  }).replace(/\/deep\/ /gim, "").replace(new RegExp(escaped + "[\\s]*" + escaped, "g"), prefix);
+  }) // ... ,      -> tag ... ,
+  .replace(/\/deep\/ /gi, "") // /deep/     ->
+  .replace(new RegExp(escaped + "[\\s]*" + escaped, "g"), prefix) // tag tag    -> tag
+  ;
 }
 
+// ' * ,\n color:rgba(1,2,3) {'.replace(/(.*)[^:](.*)[,]/gim, function($1){ return 'css-2 '+$1 })
 function css(ripple) {
   return function (res) {
     return all("[css=\"" + res.name + "\"]:not([inert])").map(ripple.draw);
@@ -1371,8 +1393,7 @@ function prehtml(ripple) {
     if (!html) return render.apply(this, arguments);
     if (html && !ripple(html)) return;
     div = document.createElement("div");
-    div.innerHTML = ripple(html);
-    el.innerHTML = div.innerHTML;
+    div.innerHTML = ripple(html);(el.shadowRoot || el).innerHTML = div.innerHTML;
     render.apply(this, arguments);
   };
 
@@ -1497,7 +1518,7 @@ function polyfill(ripple) {
   return function (res) {
     if (!ripple.observer) ripple.observer = setInterval(check(ripple), 100);
     if (!ripple.cache) ripple.cache = {};
-    if (!has(ripple.cache, res.name)) ripple.cache[res.name] = str(res.body);
+    ripple.cache[res.name] = str(res.body);
   };
 }
 
@@ -1507,6 +1528,7 @@ function check(ripple) {
     keys(ripple.cache).forEach(function (name) {
       var res = ripple.resources[name];
       if (ripple.cache[name] != str(res.body)) {
+        log("changed (x)", name);
         ripple.cache[name] = str(res.body);
         ripple.emit("change", [res], not(is["in"](["reactive"])));
       }
@@ -1691,10 +1713,10 @@ function sync(ripple, server) {
   ripple.io.on("connection", function (s) {
     return s.on("change", change(ripple));
   });
-  // ripple.io.on('connection', s => s.on('change', res => emit(ripple)()(res.name)))
   ripple.io.on("connection", function (s) {
     return emit(ripple)(s)();
   });
+  ripple.io.use(setIP);
   return ripple;
 }
 
@@ -1713,12 +1735,11 @@ function change(ripple) {
         body = to.call(socket, key("body")(res)),
         deltas = diff(body, req.body);
 
-    if (is.arr(deltas)) return delta("");
+    if (is.arr(deltas)) return delta("") && res.body.emit("change");
 
-    keys(deltas).reverse().filter(not(is("_t"))).map(flatten(deltas)).map(delta);
+    keys(deltas).reverse().filter(not(is("_t"))).map(paths(deltas)).reduce(flatten, []).map(delta).some(Boolean) && res.body.emit("change");
 
     function delta(k) {
-
       var d = key(k)(deltas),
           name = req.name,
           body = res.body,
@@ -1728,24 +1749,21 @@ function change(ripple) {
           next = types[type];
 
       if (!type) {
-        return;
+        return false;
       }if (!from || from.call(socket, value, body, index, type, name, next)) {
-        if (!index) {
-          return silent(ripple)(req);
-        }next(index, value, body, name, res);
-        // res.headers.silent = true
-        ripple(name).emit("change");
+        !index ? silent(ripple)(req) : next(index, value, body, name, res);
+        return true;
       }
     }
   };
 }
 
-function flatten(base) {
+function paths(base) {
   return function (k) {
     var d = key(k)(base);
     k = is.arr(k) ? k : [k];
 
-    return is.arr(d) ? k.join(".") : flatten(base)(k.concat(keys(d)).join("."));
+    return is.arr(d) ? k.join(".") : keys(d).map(prepend(k.join(".") + ".")).map(paths(base));
   };
 }
 
@@ -1792,7 +1810,9 @@ function silent(ripple) {
 }
 
 function io(opts) {
-  return !client ? require("socket.io")(opts.server || opts) : window.io ? window.io() : is.fn(require("socket.io-client")) ? require("socket.io-client")() : { on: noop, emit: noop };
+  var r = !client ? require("socket.io")(opts.server || opts) : window.io ? window.io() : is.fn(require("socket.io-client")) ? require("socket.io-client")() : { on: noop, emit: noop };
+  r.use = r.use || noop;
+  return r;
 }
 
 // emit all or some resources, to all or some clients
@@ -1834,9 +1854,18 @@ function stats(total, name) {
   };
 }
 
+function setIP(socket, next) {
+  socket.ip = socket.request.headers["x-forwarded-for"] || socket.request.connection.remoteAddress;
+  next();
+}
+
 var identity = window['identity'];
 
 var replace = window['replace'];
+
+var prepend = window['prepend'];
+
+var flatten = window['flatten'];
 
 var values = window['values'];
 
@@ -1867,51 +1896,55 @@ var diff = require("jsondiffpatch").diff;
 log = log("[ri/sync]");
 err = err("[ri/sync]");
 var types = { push: push, remove: remove, update: update };
-},{"jsondiffpatch":1,"socket.io":1,"socket.io-client":1,"utilise/by":160,"utilise/client":161,"utilise/err":163,"utilise/header":166,"utilise/identity":167,"utilise/is":168,"utilise/key":169,"utilise/keys":170,"utilise/log":171,"utilise/noop":172,"utilise/not":173,"utilise/replace":175,"utilise/str":177,"utilise/values":179}],160:[function(require,module,exports){
+},{"jsondiffpatch":1,"socket.io":1,"socket.io-client":1,"utilise/by":160,"utilise/client":161,"utilise/err":163,"utilise/flatten":164,"utilise/header":167,"utilise/identity":168,"utilise/is":169,"utilise/key":170,"utilise/keys":171,"utilise/log":172,"utilise/noop":173,"utilise/not":174,"utilise/prepend":176,"utilise/replace":177,"utilise/str":179,"utilise/values":181}],160:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8,"utilise/is":168,"utilise/key":169}],161:[function(require,module,exports){
+},{"dup":8,"utilise/is":169,"utilise/key":170}],161:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
 },{"dup":9}],162:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"dup":10,"utilise/sel":176}],163:[function(require,module,exports){
+},{"dup":10,"utilise/sel":178}],163:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11,"utilise/owner":174,"utilise/to":178}],164:[function(require,module,exports){
+},{"dup":11,"utilise/owner":175,"utilise/to":180}],164:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"dup":13,"utilise/is":169}],165:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"dup":14,"utilise/datum":162,"utilise/key":169}],165:[function(require,module,exports){
+},{"dup":14,"utilise/datum":162,"utilise/key":170}],166:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],166:[function(require,module,exports){
+},{"dup":15}],167:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"dup":16,"utilise/has":165}],167:[function(require,module,exports){
+},{"dup":16,"utilise/has":166}],168:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],168:[function(require,module,exports){
+},{"dup":17}],169:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19}],169:[function(require,module,exports){
+},{"dup":19}],170:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"dup":20,"utilise/is":168,"utilise/str":177}],170:[function(require,module,exports){
+},{"dup":20,"utilise/is":169,"utilise/str":179}],171:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],171:[function(require,module,exports){
+},{"dup":21}],172:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23,"utilise/is":168,"utilise/owner":174,"utilise/to":178}],172:[function(require,module,exports){
+},{"dup":23,"utilise/is":169,"utilise/owner":175,"utilise/to":180}],173:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"dup":24}],173:[function(require,module,exports){
+},{"dup":24}],174:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],174:[function(require,module,exports){
+},{"dup":55}],175:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"utilise/client":161}],175:[function(require,module,exports){
+},{"dup":25,"utilise/client":161}],176:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],177:[function(require,module,exports){
 module.exports = function replace(from, to){
   return function(d){
     return d.replace(from, to)
   }
 }
-},{}],176:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],177:[function(require,module,exports){
+},{"dup":29}],179:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30,"utilise/is":168}],178:[function(require,module,exports){
+},{"dup":30,"utilise/is":169}],180:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31}],179:[function(require,module,exports){
+},{"dup":31}],181:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"utilise/from":164,"utilise/keys":170}],180:[function(require,module,exports){
+},{"dup":32,"utilise/from":165,"utilise/keys":171}],182:[function(require,module,exports){
 "use strict";
 
 /* istanbul ignore next */
@@ -1973,17 +2006,17 @@ function create(opts) {
   db(ripple); // enable external connections
   components(ripple); // invoke web components, fn.call(<el>, data)
   reactive(ripple); // react to changes in resources
-  prehtml(ripple); // preapplies html templates
   precss(ripple); // preapplies scoped css
+  prehtml(ripple); // preapplies html templates
   shadow(ripple); // encapsulates with shadow dom or closes gap
   delay(ripple); // async rendering delay
   mysql(ripple); // adds mysql adaptor crud hooks
   serve(opts); // serve client libraries
   sync(ripple, opts); // syncs resources between server/client
   sessions(ripple, opts); // populates sessionid on each connection
-  resdir(ripple); // loads from resources folder
+  resdir(ripple, opts); // loads from resources folder
   offline(ripple); // loads/saves from/to localstorage
 
   return ripple;
 }
-},{"rijs.components":2,"rijs.core":34,"rijs.css":36,"rijs.data":43,"rijs.db":58,"rijs.delay":59,"rijs.fn":67,"rijs.html":75,"rijs.mysql":82,"rijs.offline":83,"rijs.precss":105,"rijs.prehtml":118,"rijs.reactive":130,"rijs.resdir":143,"rijs.serve":144,"rijs.sessions":145,"rijs.shadow":146,"rijs.singleton":153,"rijs.sync":159,"utilise/client":1}]},{},[180]);
+},{"rijs.components":2,"rijs.core":34,"rijs.css":36,"rijs.data":43,"rijs.db":58,"rijs.delay":59,"rijs.fn":67,"rijs.html":75,"rijs.mysql":82,"rijs.offline":83,"rijs.precss":105,"rijs.prehtml":118,"rijs.reactive":130,"rijs.resdir":143,"rijs.serve":144,"rijs.sessions":145,"rijs.shadow":146,"rijs.singleton":153,"rijs.sync":159,"utilise/client":1}]},{},[182]);
