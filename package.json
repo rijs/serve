@@ -1,6 +1,6 @@
 {
   "name": "rijs.serve",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "dist",
   "browser": "./dist/client.js",
   "author": "Pedram Emrouznejad (https://github.com/pemrouz)",
