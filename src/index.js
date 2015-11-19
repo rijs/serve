@@ -3,8 +3,6 @@
 // -------------------------------------------
 export default function serve(opts){
   log('creating')
-  
-  if (client) return identity
   if (!opts) return
   var app = expressify(opts.server || opts)
   app.use('/ripple.js', send(local('js')))
@@ -27,6 +25,5 @@ import client from 'utilise/client'
 import noop from 'utilise/noop'
 import send from 'utilise/send'
 import key from 'utilise/key'
-import log from 'utilise/log'
 import { resolve } from 'path'
-log = log('[ri/serve]')
+var log = require('utilise/log')('[ri/serve]')

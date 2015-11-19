@@ -4,12 +4,16 @@ var expect  = require('chai').expect
   , request = require('supertest')
   , app     = require('express')()
   , server  = require('http').createServer(app)
-  , serve   = require('./')(server)
+  , serve   = require('./').default(server)
 
 describe('Serve Client', function() {
   
   it('should pass over serverless node', function(){  
-    require('./')()
+    require('./').default()
+  })
+
+  it('should gracefully proceed if no server', function(){  
+    require('./').default({})
   })
 
   it('should serve client', function(done){  
