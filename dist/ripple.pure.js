@@ -1,6 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-
-},{}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -126,7 +124,9 @@ function create(opts) {
 
   return ripple;
 }
-},{"rijs.backpressure":3,"rijs.components":4,"rijs.core":7,"rijs.css":9,"rijs.data":10,"rijs.db":22,"rijs.delay":11,"rijs.fn":12,"rijs.helpers":13,"rijs.html":14,"rijs.mysql":22,"rijs.offline":15,"rijs.precss":16,"rijs.prehtml":17,"rijs.reactive":18,"rijs.resdir":22,"rijs.serve":22,"rijs.sessions":22,"rijs.shadow":19,"rijs.singleton":20,"rijs.sync":21}],3:[function(require,module,exports){
+},{"rijs.backpressure":3,"rijs.components":4,"rijs.core":7,"rijs.css":9,"rijs.data":10,"rijs.db":22,"rijs.delay":11,"rijs.fn":12,"rijs.helpers":13,"rijs.html":14,"rijs.mysql":22,"rijs.offline":15,"rijs.precss":16,"rijs.prehtml":17,"rijs.reactive":18,"rijs.resdir":22,"rijs.serve":22,"rijs.sessions":22,"rijs.shadow":19,"rijs.singleton":20,"rijs.sync":21}],2:[function(require,module,exports){
+
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1323,8 +1323,8 @@ var log = window.log('[ri/sync]'),
     err = window.err('[ri/sync]'),
     debug = noop,
     types = { push: push, remove: remove, update: update };
-},{"jsondiffpatch":1,"socket.io":1,"socket.io-client":1}],22:[function(require,module,exports){
+},{"jsondiffpatch":2,"socket.io":2,"socket.io-client":2}],22:[function(require,module,exports){
 module.exports = function identity(d) {
   return d
 }
-},{}]},{},[2]);
+},{}]},{},[1]);
