@@ -1,142 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = function identity(d) {
-  return d
-}
+
 },{}],2:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = create;
-
-var _rijs = require('rijs.backpressure');
-
-var _rijs2 = _interopRequireDefault(_rijs);
-
-var _rijs3 = require('rijs.components');
-
-var _rijs4 = _interopRequireDefault(_rijs3);
-
-var _rijs5 = require('rijs.versioned');
-
-var _rijs6 = _interopRequireDefault(_rijs5);
-
-var _rijs7 = require('rijs.singleton');
-
-var _rijs8 = _interopRequireDefault(_rijs7);
-
-var _rijs9 = require('rijs.sessions');
-
-var _rijs10 = _interopRequireDefault(_rijs9);
-
-var _rijs11 = require('rijs.features');
-
-var _rijs12 = _interopRequireDefault(_rijs11);
-
-var _rijs13 = require('rijs.offline');
-
-var _rijs14 = _interopRequireDefault(_rijs13);
-
-var _rijs15 = require('rijs.helpers');
-
-var _rijs16 = _interopRequireDefault(_rijs15);
-
-var _rijs17 = require('rijs.precss');
-
-var _rijs18 = _interopRequireDefault(_rijs17);
-
-var _rijs19 = require('rijs.shadow');
-
-var _rijs20 = _interopRequireDefault(_rijs19);
-
-var _rijs21 = require('rijs.resdir');
-
-var _rijs22 = _interopRequireDefault(_rijs21);
-
-var _rijs23 = require('rijs.mysql');
-
-var _rijs24 = _interopRequireDefault(_rijs23);
-
-var _rijs25 = require('rijs.serve');
-
-var _rijs26 = _interopRequireDefault(_rijs25);
-
-var _rijs27 = require('rijs.delay');
-
-var _rijs28 = _interopRequireDefault(_rijs27);
-
-var _rijs29 = require('rijs.needs');
-
-var _rijs30 = _interopRequireDefault(_rijs29);
-
-var _rijs31 = require('rijs.sync');
-
-var _rijs32 = _interopRequireDefault(_rijs31);
-
-var _rijs33 = require('rijs.core');
-
-var _rijs34 = _interopRequireDefault(_rijs33);
-
-var _rijs35 = require('rijs.data');
-
-var _rijs36 = _interopRequireDefault(_rijs35);
-
-var _rijs37 = require('rijs.css');
-
-var _rijs38 = _interopRequireDefault(_rijs37);
-
-var _rijs39 = require('rijs.fn');
-
-var _rijs40 = _interopRequireDefault(_rijs39);
-
-var _rijs41 = require('rijs.db');
-
-var _rijs42 = _interopRequireDefault(_rijs41);
-/* istanbul ignore next */
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-true && !window.ripple && create();
-
-function create(opts) {
-  var ripple = (0, _rijs34.default)(); // empty base collection of resources
-
-  // enrich..
-  (0, _rijs8.default)(ripple); // exposes a single instance
-  (0, _rijs36.default)(ripple); // register data types
-  (0, _rijs38.default)(ripple); // register css types
-  (0, _rijs40.default)(ripple); // register fn types
-  (0, _rijs16.default)(ripple); // expose helper functions and constants
-  (0, _rijs24.default)(ripple); // adds mysql adaptor crud hooks
-  (0, _rijs42.default)(ripple, opts); // enable external connections
-  (0, _rijs4.default)(ripple); // invoke web components, fn.call(<el>, data)
-  (0, _rijs30.default)(ripple); // define default attrs for components
-  (0, _rijs18.default)(ripple); // preapplies scoped css
-  (0, _rijs12.default)(ripple); // extend components with features
-  (0, _rijs20.default)(ripple); // encapsulates with shadow dom or closes gap
-  (0, _rijs28.default)(ripple); // async rendering delay
-  (0, _rijs26.default)(opts); // serve true libraries
-  (0, _rijs14.default)(ripple); // loads/saves from/to localstorage
-  (0, _rijs32.default)(ripple, opts); // syncs resources between server/true
-  (0, _rijs2.default)(ripple); // restricts broadcast to trues based on need
-  (0, _rijs6.default)(ripple); // versioning info and time travel
-  (0, _rijs10.default)(ripple, opts); // populates sessionid on each connection
-  (0, _rijs22.default)(ripple, opts); // loads from resources folder
-
-  return ripple;
-}
-},{"rijs.backpressure":5,"rijs.components":6,"rijs.core":9,"rijs.css":11,"rijs.data":12,"rijs.db":1,"rijs.delay":13,"rijs.features":14,"rijs.fn":15,"rijs.helpers":16,"rijs.mysql":24,"rijs.needs":17,"rijs.offline":18,"rijs.precss":19,"rijs.resdir":25,"rijs.serve":26,"rijs.sessions":27,"rijs.shadow":20,"rijs.singleton":21,"rijs.sync":22,"rijs.versioned":23}],3:[function(require,module,exports){
-
-},{}],4:[function(require,module,exports){
-module.exports = function scope(styles, prefix) {
-  return styles
-    .replace(/^(?!.*:host)([^@%\n]*){/gim, function($1){ return prefix+' '+$1 })       // ... {                 -> tag ... {
-    .replace(/^(?!.*:host)(.*?),\s*$/gim, function($1){ return prefix+' '+$1 })        // ... ,                 -> tag ... ,
-    .replace(/:host\((.*?)\)/gi, function($1, $2){ return prefix+$2 })                 // :host(...)            -> tag...
-    .replace(/:host /gi, prefix + ' ')                                                 // :host ...             -> tag ...
-    .replace(/^.*:host-context\((.*)\)/gim, function($1, $2){ return $2+' ' +prefix }) // ... :host-context(..) -> ... tag..
-}
-},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -146,12 +10,12 @@ exports.default = backpressure;/* istanbul ignore next */
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // -------------------------------------------
-// API: Applies backpressure on the flow of streams
+// Applies backpressure on the flow of streams
 // -------------------------------------------
 function backpressure(ripple) {
   log('creating');
   if (!ripple.io) return ripple;
-  if (true) return ripple.render = loaded(ripple)(ripple.render), ripple.pull = pull(ripple), ripple.deps = deps, ripple.requested = {}, (0, ready)(start(ripple)), ripple.io.on('connect', refresh(ripple)), ripple.io.on('reconnect', reconnect(ripple)), ripple;
+  if (true) return ripple.render = loaded(ripple)(ripple.render), ripple.pull = emit(ripple), ripple.deps = deps, ripple.requested = {}, (0, ready)(start(ripple)), ripple.io.on('connect', refresh(ripple)), ripple.io.on('reconnect', reconnect(ripple)), ripple;
 
   ripple.to = limit(ripple.to);
   ripple.from = track(ripple)(ripple.from);
@@ -163,11 +27,11 @@ function backpressure(ripple) {
 
 var start = function start(ripple) {
   return function (d) {
-    return ripple.pull(document.body);
+    return scan(ripple)(document.body);
   };
 };
 
-var pull = function pull(ripple) {
+var scan = function scan(ripple) {
   return function (el) {
     return !el ? undefined : ((0, all)('*', el).filter((0, by)('nodeName', (0, includes)('-'))).filter((0, by)('nodeName', function (d) {
       return !is.in(ripple.requested)((0, lo)(d));
@@ -177,21 +41,24 @@ var pull = function pull(ripple) {
 
 var track = function track(ripple) {
   return function (next) {
-    return function (_ref) {
-      var name = _ref.name;
-      var headers = _ref.headers;
+    return function (req, res) {
+      var name = req.name;
+      var type = req.type;
+      var socket = req.socket;
+      var send = ripple.send;
+      var exists = name in socket.deps;
 
-      var exists = name in this.deps;
-      if (!headers || !headers.pull) return next ? next.apply(this, arguments) : true;
-      this.deps[name] = 1;
-      ripple.stream(this)(name);
+      if (!(name in ripple.resources)) return;
+      if (type !== 'pull') return (next || identity)(req, res);
+      socket.deps[name] = 1;
+      send(socket)(name);
       return false;
     };
   };
 };
 
-var reconnect = function reconnect(_ref2) {
-  var io = _ref2.io;
+var reconnect = function reconnect(_ref) {
+  var io = _ref.io;
   return function (d) {
     return io.io.disconnect(), io.io.connect();
   };
@@ -200,8 +67,8 @@ var reconnect = function reconnect(_ref2) {
 var refresh = function refresh(ripple) {
   return function (d) {
     return (0, group)('refreshing', function (d) {
-      return (0, values)(ripple.resources).map(function (_ref3) {
-        var name = _ref3.name;
+      return (0, values)(ripple.resources).map(function (_ref2) {
+        var name = _ref2.name;
         return emit(ripple)(name);
       });
     });
@@ -211,15 +78,15 @@ var refresh = function refresh(ripple) {
 var emit = function emit(ripple) {
   return function (name) {
     log('pulling', name);
-    ripple.io.emit('change', [name, false, { name: name, headers: headers }]);
+    ripple.io.emit('change', { name: name, type: 'pull' });
     ripple.requested[name] = 1;
     return name;
   };
 };
 
 var limit = function limit(next) {
-  return function (res) {
-    return !(res.name in this.deps) ? false : !next ? true : next.apply(this, arguments);
+  return function (req) {
+    return req.name in req.socket.deps ? (next || identity)(req) : false;
   };
 };
 
@@ -240,15 +107,14 @@ var loaded = function loaded(ripple) {
     return function (el) {
       return ripple.deps(el)
       // .filter(not(is.in(ripple.resources)))
-      .filter((0, not)(is.in(ripple.requested))).map(emit(ripple)).length ? false : ripple.pull(render(el));
+      .filter((0, not)(is.in(ripple.requested))).map(emit(ripple)).length ? false : scan(render(el));
     };
   };
 };
 
 var log = window.log('[ri/back]'),
-    err = window.err('[ri/back]'),
-    headers = { pull: true };
-},{}],6:[function(require,module,exports){
+    err = window.err('[ri/back]');
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -409,7 +275,7 @@ var log = window.log('[ri/components]'),
     customs = true && !!document.registerElement,
     isAttached = customs ? 'html *, :host-context(html) *' : 'html *';
 true && (Element.prototype.matches = Element.prototype.matches || Element.prototype.msMatchesSelector);
-},{"./types/data":7,"./types/fn":8}],7:[function(require,module,exports){
+},{"./types/data":4,"./types/fn":5}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -424,7 +290,7 @@ function data(ripple) {
     return (0, all)('[data~="' + res.name + '"]:not([inert])').map(ripple.draw);
   };
 }
-},{}],8:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -455,7 +321,7 @@ var customs = true && !!document.registerElement,
     customEl = function customEl(d) {
   return (0, includes)('-')(d.name);
 };
-},{}],9:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -556,7 +422,7 @@ var err = window.err('[ri/core]'),
     now = function now(d, t) {
   return t = (0, key)('body.log.length')(d), is.num(t) ? t - 1 : t;
 };
-},{"./types/text":10}],10:[function(require,module,exports){
+},{"./types/text":7}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -570,7 +436,7 @@ exports.default = {
     return !(0, includes)('.html')(res.name) && !(0, includes)('.css')(res.name) && is.str(res.body);
   }
 };
-},{}],11:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -596,7 +462,7 @@ function css(ripple) {
 }
 
 var log = window.log('[ri/types/css]');
-},{}],12:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -643,7 +509,11 @@ var trickle = function trickle(ripple) {
 
 var log = window.log('[ri/types/data]'),
     listeners = (0, key)('body.on');
-},{}],13:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+module.exports = function identity(d) {
+  return d
+}
+},{}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -672,7 +542,7 @@ var render = function render(next) {
 
 var log = window.log('[ri/delay]'),
     err = window.err('[ri/delay]');
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -711,7 +581,7 @@ var render = function render(ripple) {
 };
 
 var log = window.log('[ri/features]');
-},{}],15:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -740,15 +610,140 @@ var parse = function parse(res) {
 };
 var log = window.log('[ri/types/fn]');
 var to = function to(res) {
-  return res.body = (0, str)(res.body), res;
+  return res.value = (0, str)(res.value), res;
 };
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = helpers;/* istanbul ignore next */
+exports.default = create;
+
+var _rijs = require('rijs.backpressure');
+
+var _rijs2 = _interopRequireDefault(_rijs);
+
+var _rijs3 = require('rijs.components');
+
+var _rijs4 = _interopRequireDefault(_rijs3);
+
+var _rijs5 = require('rijs.versioned');
+
+var _rijs6 = _interopRequireDefault(_rijs5);
+
+var _rijs7 = require('rijs.singleton');
+
+var _rijs8 = _interopRequireDefault(_rijs7);
+
+var _rijs9 = require('rijs.sessions');
+
+var _rijs10 = _interopRequireDefault(_rijs9);
+
+var _rijs11 = require('rijs.features');
+
+var _rijs12 = _interopRequireDefault(_rijs11);
+
+var _rijs13 = require('rijs.offline');
+
+var _rijs14 = _interopRequireDefault(_rijs13);
+
+var _rijs15 = require('rijs.helpers');
+
+var _rijs16 = _interopRequireDefault(_rijs15);
+
+var _rijs17 = require('rijs.precss');
+
+var _rijs18 = _interopRequireDefault(_rijs17);
+
+var _rijs19 = require('rijs.shadow');
+
+var _rijs20 = _interopRequireDefault(_rijs19);
+
+var _rijs21 = require('rijs.resdir');
+
+var _rijs22 = _interopRequireDefault(_rijs21);
+
+var _rijs23 = require('rijs.mysql');
+
+var _rijs24 = _interopRequireDefault(_rijs23);
+
+var _rijs25 = require('rijs.serve');
+
+var _rijs26 = _interopRequireDefault(_rijs25);
+
+var _rijs27 = require('rijs.delay');
+
+var _rijs28 = _interopRequireDefault(_rijs27);
+
+var _rijs29 = require('rijs.needs');
+
+var _rijs30 = _interopRequireDefault(_rijs29);
+
+var _rijs31 = require('rijs.sync');
+
+var _rijs32 = _interopRequireDefault(_rijs31);
+
+var _rijs33 = require('rijs.core');
+
+var _rijs34 = _interopRequireDefault(_rijs33);
+
+var _rijs35 = require('rijs.data');
+
+var _rijs36 = _interopRequireDefault(_rijs35);
+
+var _rijs37 = require('rijs.css');
+
+var _rijs38 = _interopRequireDefault(_rijs37);
+
+var _rijs39 = require('rijs.fn');
+
+var _rijs40 = _interopRequireDefault(_rijs39);
+
+var _rijs41 = require('rijs.db');
+
+var _rijs42 = _interopRequireDefault(_rijs41);
+/* istanbul ignore next */
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+true && !window.ripple && create();
+
+function create(opts) {
+  var ripple = (0, _rijs34.default)(); // empty base collection of resources
+
+  // enrich..
+  (0, _rijs8.default)(ripple); // exposes a single instance
+  (0, _rijs36.default)(ripple); // register data types
+  (0, _rijs38.default)(ripple); // register css types
+  (0, _rijs40.default)(ripple); // register fn types
+  (0, _rijs16.default)(ripple); // expose helper functions and constants
+  (0, _rijs24.default)(ripple); // adds mysql adaptor crud hooks
+  (0, _rijs42.default)(ripple, opts); // enable external connections
+  (0, _rijs4.default)(ripple); // invoke web components, fn.call(<el>, data)
+  (0, _rijs30.default)(ripple); // define default attrs for components
+  (0, _rijs18.default)(ripple); // preapplies scoped css
+  (0, _rijs12.default)(ripple); // extend components with features
+  (0, _rijs20.default)(ripple); // encapsulates with shadow dom or closes gap
+  (0, _rijs28.default)(ripple); // async rendering delay
+  (0, _rijs26.default)(ripple, opts); // serve true libraries
+  (0, _rijs14.default)(ripple); // loads/saves from/to localstorage
+  (0, _rijs32.default)(ripple, opts); // syncs resources between server/true
+  (0, _rijs2.default)(ripple); // restricts broadcast to trues based on need
+  (0, _rijs6.default)(ripple); // versioning info and time travel
+  (0, _rijs10.default)(ripple, opts); // populates sessionid on each connection
+  (0, _rijs22.default)(ripple, opts); // loads from resources folder
+
+  return ripple;
+}
+},{"rijs.backpressure":2,"rijs.components":3,"rijs.core":6,"rijs.css":8,"rijs.data":9,"rijs.db":10,"rijs.delay":11,"rijs.features":12,"rijs.fn":13,"rijs.helpers":15,"rijs.mysql":16,"rijs.needs":17,"rijs.offline":18,"rijs.precss":19,"rijs.resdir":21,"rijs.serve":22,"rijs.sessions":23,"rijs.shadow":24,"rijs.singleton":25,"rijs.sync":26,"rijs.versioned":27}],15:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = helpers;
+
+/* istanbul ignore next */
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // -------------------------------------------
@@ -779,9 +774,8 @@ var attach = function attach(next) {
 };
 
 var serialise = function serialise(next) {
-  return function (res, change) {
-    if (change) return next ? next.call(this, res, change) : true;
-    var helpers = res.headers.helpers;
+  return function (req) {
+    var helpers = req.headers.helpers;
 
     (0, keys)(helpers).filter(function (name) {
       return is.fn(helpers[name]);
@@ -789,12 +783,14 @@ var serialise = function serialise(next) {
       return helpers[name] = (0, str)(helpers[name]);
     });
 
-    return next ? next.call(this, res, change) : res;
+    return (next || identity)(req);
   };
 };
 
 var log = window.log('[ri/helpers]');
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],17:[function(require,module,exports){
 'use strict';
 
 var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
@@ -972,7 +968,22 @@ var css = function css(ripple) {
 
 var log = window.log('[ri/precss]'),
     err = window.err('[ri/precss]');
-},{"cssscope":4}],20:[function(require,module,exports){
+},{"cssscope":20}],20:[function(require,module,exports){
+module.exports = function scope(styles, prefix) {
+  return styles
+    .replace(/^(?!.*:host)([^@%\n]*){/gim, function($1){ return prefix+' '+$1 })       // ... {                 -> tag ... {
+    .replace(/^(?!.*:host)(.*?),\s*$/gim, function($1){ return prefix+' '+$1 })        // ... ,                 -> tag ... ,
+    .replace(/:host\((.*?)\)/gi, function($1, $2){ return prefix+$2 })                 // :host(...)            -> tag...
+    .replace(/:host /gi, prefix + ' ')                                                 // :host ...             -> tag ...
+    .replace(/^.*:host-context\((.*)\)/gim, function($1, $2){ return $2+' ' +prefix }) // ... :host-context(..) -> ... tag..
+}
+},{}],21:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],22:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],23:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1020,7 +1031,7 @@ var retarget = function retarget(el) {
 
 var log = window.log('[ri/shadow]'),
     err = window.err('[ri/shadow]');
-},{}],21:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1040,19 +1051,13 @@ function singleton(ripple) {
 }
 
 var log = window.log('[ri/singleton]');
-},{}],22:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-/* istanbul ignore next */
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-exports.default = sync;
-
-/* istanbul ignore next */
+exports.default = sync;/* istanbul ignore next */
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // -------------------------------------------
@@ -1062,138 +1067,128 @@ function sync(ripple, server) {
   log('creating');
 
 /* istanbul ignore next */
-  if (!true && !server) return;
+  if (!true && !server) return ripple;
 /* istanbul ignore next */
   if (!true) ripple.to = clean(ripple.to), (0, values)(ripple.types).map(function (type) {
     return type.parse = headers(ripple)(type.parse);
   });
 
-  ripple.stream = stream(ripple);
-  ripple.respond = respond(ripple);
   ripple.io = io(server);
-  ripple.on('change.stream', ripple.stream()); // both   - broadcast change to everyone
-  ripple.io.on('change', consume(ripple)); // true - receive change
-  ripple.io.on('response', response(ripple)); // true - receive response
-  ripple.io.on('connection', function (s) {
-    return s.on('change', consume(ripple));
-  }); // server - receive change
-  ripple.io.on('connection', function (s) {
-    return ripple.stream(s)();
-  }); // server - send all resources to new true
-  ripple.io.use(setIP);
+  // TODO: ripple.req = req(ripple)
+/* istanbul ignore next */
+  ripple.send = true ? send(ripple)(ripple.io) : send(ripple);
+  ripple.on('change.send', broadcast(ripple));
+  ripple.io.on('change', consume(ripple));
+  ripple.io.on('connection', connected);
+  ripple.io.use(ip);
   return ripple;
 }
 
-var respond = function respond(ripple) {
-  return function (socket, name, time) {
-    return function (reply) {
-      socket.emit('response', [name, time, reply]);
-    };
-  };
+var connected = function connected(socket) {
+  log('connected'.green, socket.ip.grey);
+  socket.on('change', consume(ripple));
+  ripple.send(socket)();
 };
 
-var response = function response(ripple) {
-  return function (_ref) {
+var broadcast = function broadcast(ripple) {
+  return function (name, change) {
 /* istanbul ignore next */
-    var _ref2 = _slicedToArray(_ref, 3);
-
-    var name = _ref2[0];
-    var time = _ref2[1];
-    var reply = _ref2[2];
-
-    ripple.resources[name].body.emit('response._' + time, reply);
+    return (true ? ripple.send : ripple.send())((0, extend)({ name: name })(change || {}));
   };
 };
 
-// send diff to all or some sockets
-var stream = function stream(ripple) {
-  return function (sockets) {
-    return function (name, change) {
-      if (!name) return (0, values)(ripple.resources).map(function (d) {
-        return stream(ripple)(sockets)(d.name);
-      });
-
+// send all or some diffs to all or some sockets
+var send = function send(ripple) {
+  var l = arguments.length <= 1 || arguments[1] === undefined ? log : arguments[1];
+  return function (who) {
+    return function (req, type, value) {
 /* istanbul ignore next */
       var everyone = true ? [ripple.io] : (0, values)(ripple.io.of('/').sockets),
-          log = count(everyone.length, name),
-          res = ripple.resources[name],
-          send = to(ripple, res, change);
+          sockets = is.arr(who) ? who : is.str(who) ? everyone.filter((0, by)('sessionID', who)) : !who ? everyone : [who],
+          count = function count(sent) {
+        return (0, str)(sent.length).green.bold + '/' + (0, str)(everyone.length).green;
+      };
 
-      return !res ? log('no resource', name) : is.str(sockets) ? (log(everyone.filter((0, by)('sessionID', sockets)).map(send)), ripple) : !sockets ? (log(everyone.map(send)), ripple) : (log(send(sockets)), ripple);
+      if (!sockets.length) return Promise.resolve([]);
+      if (!req) return l('send'.grey, count(sockets), 'all'.bold), (0, values)(ripple.resources).map(function (_ref) {
+        var name = _ref.name;
+/* istanbul ignore next */
+        return send(ripple, noop)(sockets)(name);
+      });
+
+      if (is.str(req)) {
+        if (!(req in ripple.resources)) return Promise.reject(err('cannot send ' + req));
+        req = type ? { name: req, type: type, value: value } : { name: req,
+          type: 'update',
+          headers: ripple.resources[req].headers,
+          value: ripple.resources[req].body,
+          time: now(ripple.resources[req])
+        };
+      }
+
+      var resource = ripple.resources[req.name],
+          emit = to(ripple, resource, req),
+          promises = sockets.map(emit).filter(Boolean);
+
+      if (promises.length) l('send'.grey, count(promises), (req.name || req).bold);
+      return Promise.all(promises);
     };
   };
 };
 
 // outgoing transforms
-var to = function to(ripple, res, change) {
+var to = function to(ripple, resource, req) {
   return function (socket) {
-    if ((0, header)('silent', socket)(res)) return delete res.headers.silent, false;
+    if ((0, header)('silent', socket)(resource)) return delete resource.headers.silent, false;
 
-    var xres = (0, header)('to')(res),
-        xtype = type(ripple)(res).to,
-        xall = ripple.to,
-        body,
-        rep,
-        out;
+    var nametype = ('(' + req.name + ', ' + req.type + ')').bold,
+        xres = (0, header)('to')(resource) || identity,
+        xtyp = type(ripple)(resource).to || identity,
+        xall = ripple.to || identity,
+        p = (0, promise)();
 
-    body = res.body;
-    if (xres) {
-      if (!(out = xres.call(socket, res, change))) return false;
-      if (out !== true) {
-        change = false, body = out;
-      }
-    }
+    req = (0, extend)({ socket: socket })(req);
+    if (!(req = xres(req))) return false;
+    if (!(req = xtyp(req))) return false;
+    if (!(req = xall(req))) return false;
+    delete req.socket;
 
-    rep = { name: res.name, body: body, headers: res.headers };
-    if (xtype) {
-      if (!(out = xtype.call(socket, rep, change))) return false;
-      if (out !== true) change = false, rep = out;
-    }
+    socket.emit('change', req, function res() {
+      deb('ack'.grey, nametype, (0, str)(socket.ip).grey);
+      p.resolve.apply(ripple, arguments);
+    });
 
-    if (xall) {
-      if (!(out = xall.call(socket, rep, change))) return false;
-      if (out !== true) change = false, rep = out;
-    }
-
-    return socket.emit('change', change ? [res.name, change] : [res.name, false, rep]), true;
+    return p;
   };
 };
 
 // incoming transforms
 var consume = function consume(ripple) {
-  return function (_ref3, ack) {
+  return function (req) {
 /* istanbul ignore next */
-    var _ref4 = _slicedToArray(_ref3, 3);
+    var res = arguments.length <= 1 || arguments[1] === undefined ? noop : arguments[1];
 
-    var name = _ref4[0];
-    var change = _ref4[1];
-    var _ref4$ = _ref4[2];
-    var req = _ref4$ === undefined ? {} : _ref4$;
+    var nametype = ('(' + req.name + ', ' + req.type + ')').bold,
+        resource = ripple.resources[req.name],
+        silent = silence(req.socket = this),
+        xres = (0, header)('from')(resource) || identity,
+        xtyp = type(ripple)(resource).from || identity,
+        xall = ripple.from || identity;
 
-    log('receiving', name);
-
-    var res = ripple.resources[name],
-        xall = ripple.from,
-        xtype = type(ripple)(res).from || type(ripple)(req).from // is latter needed?
-    ,
-        xres = (0, header)('from')(res),
-        next = (0, set)(change),
-        silent = silence(this),
-        respond = ack || ripple.respond(this, name, change.time);
-
-    return xall && !xall.call(this, req, change, respond) ? debug('skip all', name) // rejected - by xall
-    : xtype && !xtype.call(this, req, change, respond) ? debug('skip type', name) // rejected - by xtype
-    : xres && !xres.call(this, req, change, respond) ? debug('skip res', name) // rejected - by xres
-    : !change ? ripple(silent(req)) // accept - replace (new)
-    : !change.key ? ripple(silent({ name: name, body: change.value })) // accept - replace at root
-    : (silent(res), next(res.body)); // accept - deep change
+    log('recv'.grey, nametype);
+    try {
+      !req.name ? res(404, err('not found'.red, req.name)) : !(req = xall(req, res)) ? deb('skip', 'global', nametype) : !(req = xtyp(req, res)) ? deb('skip', 'type', nametype) : !(req = xres(req, res)) ? deb('skip', 'resource', nametype) : !req.key && req.type == 'update' ? (ripple(silent(body(req))), res(200, deb('ok ' + nametype))) : isStandardVerb(req.type) ? ((0, set)(req)(silent(resource).body), res(200, deb('ok ' + nametype, key.grey))) : !isStandardVerb(req.type) ? res(405, err('method not allowed', req)) : res(400, err('cannot process', req));
+    } catch (e) {
+      res(e.status || 500, err(e.message, nametype, '\n', e.stack));
+    }
   };
 };
 
-var count = function count(total, name) {
-  return function (tally) {
-    return debug((0, str)((is.arr(tally) ? tally : [1]).filter(Boolean).length).green.bold + '/' + (0, str)(total).green, 'sending', name);
-  };
+var body = function body(_ref2) {
+  var name = _ref2.name;
+  var value = _ref2.value;
+  var headers = _ref2.headers;
+  return { name: name, body: value, headers: headers };
 };
 
 var headers = function headers(ripple) {
@@ -1217,18 +1212,14 @@ var io = function io(opts) {
   return r;
 };
 
-var setIP = function setIP(socket, next) {
+var ip = function ip(socket, next) {
   socket.ip = socket.request.headers['x-forwarded-for'] || socket.request.connection.remoteAddress;
   next();
 };
 
 var clean = function clean(next) {
-  return function (_ref5, change) {
-    var name = _ref5.name;
-    var body = _ref5.body;
-    var headers = _ref5.headers;
-
-    if (change) return next ? next.apply(this, arguments) : true;
+  return function (req, res) {
+    if (!req.headers || !req.headers.silent) return (next || identity)(req, res);
 
     var stripped = {};
 
@@ -1236,7 +1227,8 @@ var clean = function clean(next) {
       return stripped[header] = headers[header];
     });
 
-    return (next || identity).apply(this, [{ name: name, body: body, headers: stripped }, change]);
+    req.headers = stripped;
+    return (next || identity)(req, res);
   };
 };
 
@@ -1245,16 +1237,20 @@ var type = function type(ripple) {
     return ripple.types[(0, header)('content-type')(res)] || {};
   };
 },
+    now = function now(d, t) {
+  return t = (0, key)('body.log.length')(d), is.num(t) ? t - 1 : t;
+},
     silence = function silence(socket) {
   return function (res) {
     return (0, key)('headers.silent', socket)(res);
   };
 },
+    isStandardVerb = is.in(['update', 'add', 'remove']),
     log = window.log('[ri/sync]'),
     err = window.err('[ri/sync]'),
 /* istanbul ignore next */
-    debug = noop;
-},{"socket.io":3,"socket.io-client":3}],23:[function(require,module,exports){
+    deb = (!true && {}.DEBUG || '').split(',').some((0, is)('[ri/sync]')) ? log : identity;
+},{"socket.io":1,"socket.io-client":1}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1337,12 +1333,4 @@ var logged = function logged(res) {
 
 var log = window.log('[ri/versioned]'),
     err = window.err('[ri/versioned]');
-},{}],24:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"dup":1}],25:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"dup":1}],26:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"dup":1}],27:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"dup":1}]},{},[2]);
+},{}]},{},[14]);
