@@ -8,42 +8,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = backpressure;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* istanbul ignore next */
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // -------------------------------------------
