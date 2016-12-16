@@ -1,11 +1,12 @@
 // -------------------------------------------
 // Serves the client library /ripple.js
 // -------------------------------------------
-export default function serve(ripple, opts){
+export default function serve(ripple, { server, serve = __dirname } = {}){
   log('creating')
-  if (!opts) return ripple
-  const app  = expressify(opts.server || opts)
-      , path = local(opts.serve || __dirname)
+  server = ripple.server = ripple.server || server
+  if (!server) return ripple
+  const app  = expressify(server)
+      , path = local(serve)
 
   app.use('/ripple.js', send(path('js')))
   app.use('/ripple.min.js', send(path('min.js')))
@@ -14,14 +15,14 @@ export default function serve(ripple, opts){
   return ripple
 }
 
-const expressify = server => key('_events.request')(server) || { use: noop }
+const expressify = server => server.express
+  || key('_events.request')(server) 
+  || server.on('request', express())._events.request
 
 const local = path => ext => resolve(path, './ripple.' + ext)
 
-import identity from 'utilise/identity'
-import client from 'utilise/client'
-import noop from 'utilise/noop'
 import send from 'utilise/send'
 import key from 'utilise/key'
 import { resolve } from 'path'
+import express from 'express'
 const log = require('utilise/log')('[ri/serve]')
