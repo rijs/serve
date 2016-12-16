@@ -5,18 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = serve;
 
-var _identity = require('utilise/identity');
-
-var _identity2 = _interopRequireDefault(_identity);
-
-var _client = require('utilise/client');
-
-var _client2 = _interopRequireDefault(_client);
-
-var _noop = require('utilise/noop');
-
-var _noop2 = _interopRequireDefault(_noop);
-
 var _send = require('utilise/send');
 
 var _send2 = _interopRequireDefault(_send);
@@ -27,17 +15,28 @@ var _key2 = _interopRequireDefault(_key);
 
 var _path = require('path');
 
+var _express = require('express');
+
+var _express2 = _interopRequireDefault(_express);
+
 /* istanbul ignore next */
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // -------------------------------------------
 // Serves the client library /ripple.js
 // -------------------------------------------
-function serve(ripple, opts) {
+function serve(ripple) {
+  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+  var server = _ref.server;
+  var _ref$serve = _ref.serve;
+  var serve = _ref$serve === undefined ? __dirname : _ref$serve;
+
   log('creating');
-  if (!opts) return ripple;
-  var app = expressify(opts.server || opts),
-      path = local(opts.serve || __dirname);
+  server = ripple.server = ripple.server || server;
+  if (!server) return ripple;
+  var app = expressify(server),
+      path = local(serve);
 
   app.use('/ripple.js', (0, _send2.default)(path('js')));
   app.use('/ripple.min.js', (0, _send2.default)(path('min.js')));
@@ -47,7 +46,7 @@ function serve(ripple, opts) {
 }
 
 var expressify = function expressify(server) {
-  return (0, _key2.default)('_events.request')(server) || { use: _noop2.default };
+  return server.express || (0, _key2.default)('_events.request')(server) || server.on('request', (0, _express2.default)())._events.request;
 };
 
 var local = function local(path) {
