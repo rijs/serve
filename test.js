@@ -9,15 +9,15 @@ var expect  = require('chai').expect
 describe('Serve Client', function() {
   
   it('should skip if no server given', function(){  
-    expect(require('./').default({}).server).to.be.not.ok
-    expect(require('./').default({}, {}).server).to.be.not.ok
+    expect(require('./').default({})).to.be.eql({})
+    expect(require('./').default({}, {})).to.be.eql({})
     var plainServer = createServer()
-    expect(require('./').default({}, { server: plainServer }).server).to.be.equal(plainServer)
+    require('./').default({}, { server: plainServer })
     expect(plainServer._events.request).to.be.a('function')
 
     var app = require('express')()
       , expressServer = createServer(app)
-    expect(require('./').default({}, { server: expressServer }).server).to.be.equal(expressServer)
+    require('./').default({}, { server: expressServer })
     expect(expressServer._events.request).to.be.equal(app)
   })
 

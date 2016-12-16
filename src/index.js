@@ -3,7 +3,7 @@
 // -------------------------------------------
 export default function serve(ripple, { server, serve = __dirname } = {}){
   log('creating')
-  server = ripple.server = ripple.server || server
+  server = ripple.server || server
   if (!server) return ripple
   const app  = expressify(server)
       , path = local(serve)
