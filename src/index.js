@@ -7,11 +7,12 @@ export default function serve(ripple, { server, serve = __dirname } = {}){
   if (!server) return ripple
   const app  = expressify(server)
       , path = local(serve)
+      , compress = compression()
 
-  app.use('/ripple.js', send(path('js')))
-  app.use('/ripple.min.js', send(path('min.js')))
-  app.use('/ripple.pure.js', send(path('pure.js')))
-  app.use('/ripple.pure.min.js', send(path('pure.min.js')))
+  app.use('/ripple.js', compress, send(path('js')))
+  app.use('/ripple.min.js', compress, send(path('min.js')))
+  app.use('/ripple.pure.js', compress, send(path('pure.js')))
+  app.use('/ripple.pure.min.js', compress, send(path('pure.min.js')))
   return ripple
 }
 
@@ -21,6 +22,7 @@ const expressify = server => server.express
 
 const local = path => ext => resolve(path, './ripple.' + ext)
 
+import compression from 'compression'
 import send from 'utilise/send'
 import key from 'utilise/key'
 import { resolve } from 'path'
