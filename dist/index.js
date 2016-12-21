@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = serve;
 
+var _compression = require('compression');
+
+var _compression2 = _interopRequireDefault(_compression);
+
 var _send = require('utilise/send');
 
 var _send2 = _interopRequireDefault(_send);
@@ -33,15 +37,16 @@ function serve(ripple) {
   var serve = _ref$serve === undefined ? __dirname : _ref$serve;
 
   log('creating');
-  server = ripple.server = ripple.server || server;
+  server = ripple.server || server;
   if (!server) return ripple;
   var app = expressify(server),
-      path = local(serve);
+      path = local(serve),
+      compress = (0, _compression2.default)();
 
-  app.use('/ripple.js', (0, _send2.default)(path('js')));
-  app.use('/ripple.min.js', (0, _send2.default)(path('min.js')));
-  app.use('/ripple.pure.js', (0, _send2.default)(path('pure.js')));
-  app.use('/ripple.pure.min.js', (0, _send2.default)(path('pure.min.js')));
+  app.use('/ripple.js', compress, (0, _send2.default)(path('js')));
+  app.use('/ripple.min.js', compress, (0, _send2.default)(path('min.js')));
+  app.use('/ripple.pure.js', compress, (0, _send2.default)(path('pure.js')));
+  app.use('/ripple.pure.min.js', compress, (0, _send2.default)(path('pure.min.js')));
   return ripple;
 }
 
