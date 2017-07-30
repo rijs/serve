@@ -61,4 +61,16 @@ describe('Serve Client', function() {
       .expect(200, done)
   })
 
+  it('should serve client with different name', function(done){  
+    var app    = require('express')()
+      , server = require('http').createServer(app)
+      , serve  = require('./').default({}, { server: server, client: 'framework', serve: __dirname + '/src/test' })
+
+    request(app)
+      .get('/framework.js')
+      .expect("var framework = 'hello world'")
+      .expect('Content-Type', 'application/javascript')
+      .expect(200, done)
+  })
+
 })

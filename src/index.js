@@ -1,18 +1,18 @@
 // -------------------------------------------
 // Serves the client library /ripple.js
 // -------------------------------------------
-export default function serve(ripple, { server, serve = __dirname } = {}){
+module.exports = function serve(ripple, { server, serve = __dirname, client = 'ripple' } = {}){
   log('creating')
   server = ripple.server || server
   if (!server) return ripple
   const app  = expressify(server)
-      , path = local(serve)
+      , path = local(serve, client)
       , compress = compression()
 
-  app.use('/ripple.js', compress, send(path('js')))
-  app.use('/ripple.min.js', compress, send(path('min.js')))
-  app.use('/ripple.pure.js', compress, send(path('pure.js')))
-  app.use('/ripple.pure.min.js', compress, send(path('pure.min.js')))
+  app.use(`/${client}.js`, compress, send(path('js')))
+  app.use(`/${client}.min.js`, compress, send(path('min.js')))
+  app.use(`/${client}.pure.js`, compress, send(path('pure.js')))
+  app.use(`/${client}.pure.min.js`, compress, send(path('pure.min.js')))
   return ripple
 }
 
@@ -20,11 +20,11 @@ const expressify = server => server.express
   || key('_events.request')(server) 
   || server.on('request', express())._events.request
 
-const local = path => ext => resolve(path, './ripple.' + ext)
+const local = (path, client) => ext => resolve(path, `./${client}.` + ext)
 
-import compression from 'compression'
-import send from 'utilise/send'
-import key from 'utilise/key'
-import { resolve } from 'path'
-import express from 'express'
-const log = require('utilise/log')('[ri/serve]')
+const compression = require('compression')
+    , send = require('utilise/send')
+    , key = require('utilise/key')
+    , { resolve } = require('path')
+    , express = require('express')
+    , log = require('utilise/log')('[ri/serve]')
