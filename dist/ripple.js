@@ -144,7 +144,7 @@ var key = function key(k, v){
     return !o ? undefined 
          : !is_1.num(k) && !k ? o
          : is_1.arr(k) ? (k.map(copy), masked)
-         : o[k] || !keys.length ? (set ? ((o[k] = is_1.fn(v) ? v(o[k], i) : v), o)
+         : o[k] || !keys.length ? (set ? (o[k] = is_1.fn(v) ? v(o[k], i) : v, o)
                                        :  (is_1.fn(k) ? k(o) : o[k]))
                                 : (set ? (key(keys.join('.'), v)(o[root] ? o[root] : (o[root] = {})), o)
                                        :  key(keys.join('.'))(o[root]))
@@ -482,8 +482,7 @@ var render = function (ripple) { return function (next) { return function (el) {
   return !node || !node.state ? undefined
        : (features
           .map(key('body'))
-          .map(function (d) { return d.call(node.shadowRoot || node, node.shadowRoot || node, node.state); })
-          , node)
+          .map(function (d) { return d.call(node.shadowRoot || node, node.shadowRoot || node, node.state); }), node)
 }; }; };
 
 var log$$2 = log('[ri/features]');
@@ -558,7 +557,6 @@ var cache = function (ripple) { return function (res) {
 }; };
 
 var log$3 = log('[ri/offline]');
-var err$2 = err('[ri/offline]');
 
 var raw = function raw(selector, doc){
   var prefix = !doc && document.head.createShadowRoot ? 'html /deep/ ' : '';
@@ -704,8 +702,7 @@ var parse = function (attrs, component) {
   );
 };
 
-var log$$2 = log('[ri/needs]')
-    , err$$2 = err('[ri/needs]');
+var log$$2 = log('[ri/needs]');
 });
 
 var promise_1 = promise;
@@ -725,7 +722,7 @@ function promise() {
 
 var flatten = function flatten(p,v){ 
   if (v instanceof Array) { v = v.reduce(flatten, []); }
-  return (p = p || []), p.concat(v) 
+  return p = p || [], p.concat(v) 
 };
 
 var has = function has(o, k) {
@@ -898,6 +895,7 @@ var pow = Math.pow;
 
 var connect = function (io, url) { return function () {
   var WebSocket = window.WebSocket;
+  var location = window.location;
   var setTimeout = window.setTimeout;
   var socket = new WebSocket(url);
   socket.onopen = function (d) { return io.emit('connected', socket); };
@@ -1228,9 +1226,7 @@ var binary = function (socket, blob, meta, start, blockSize) {
   var output = emitterify().on('recv')
       , next = function (id) { return function () { return start >= blob.size 
             ? output.emit('sent', { id: id })
-            : ( socket.send(blob.slice(start, start += blockSize))
-              , window.setTimeout(next(id))
-              ); }; };
+            : ( socket.send(blob.slice(start, start += blockSize)), window.setTimeout(next(id))); }; };
 
   send(socket, 'BINARY')({ size: blob.size, meta: meta })
     .on('sent', function (ref) {
@@ -1417,7 +1413,9 @@ var subscribe = function (ripple) { return function (name, k) {
   if (ripple.subscriptions[name][k])
     { output
       .on('start')
-      .map(function (o) { return o.send(key(k)(ripple(name))); }); }
+      .map(function () { return key(k)(ripple(name)); })
+      .filter(is_1.def)
+      .map(function (initial) { return output.next(initial); }); }
 
   var raw = ripple.subscriptions[name][k] = ripple.subscriptions[name][k] || ripple
     .send(name, 'SUBSCRIBE', k)
@@ -1430,7 +1428,7 @@ var subscribe = function (ripple) { return function (name, k) {
   return output
 }; };
 
-var upload = function (ripple) { return function (resource, form) {
+var upload = function (ripple) { return function (name, form) {
   var index = ++ripple.upload.id
     , fields = {}
     , size = 0
@@ -1445,6 +1443,8 @@ var upload = function (ripple) { return function (resource, form) {
           .send(blob, { filename: filename, field: field, i: i, index: index })
           .on('progress', function (ref) {
             var received = ref.received;
+            var total = ref.total;
+
             return output.emit('progress', {
             total: size
           , received: 
@@ -1470,10 +1470,10 @@ var upload = function (ripple) { return function (resource, form) {
   var output = ripple.send({ 
     files: files.length
   , type: 'PREUPLOAD'
-  , resource: resource
   , fields: fields
   , index: index
   , size: size 
+  , name: name
   }).once('sent', next);
 
   return output
@@ -1631,9 +1631,12 @@ var rijs_data = function data(ripple){
     .on('change.data')
     .filter(function (ref) {
       var name = ref[0];
+      var change = ref[1];
+
       return header('content-type', 'application/data')(ripple.resources[name]);
   })
     .filter(function (ref) {
+      var name = ref[0];
       var change = ref[1];
 
       return change && change.key;
@@ -1751,12 +1754,7 @@ function create(opts){
   rijs_precss(ripple);         // preapplies scoped css 
   rijs_offline(ripple);        // loads/saves from/to localstorage
   client$3(ripple, opts);     // syncs resources between server/client  
-  identity(ripple, opts); // populates sessionid on each connection
-  identity(ripple, opts);    // serve client libraries
-  identity(ripple, opts);    // serve pages directory 
   rijs_features(ripple);       // extend components with features
-  identity(ripple, opts);   // loads from resources folder
-  
   return ripple
 }
 

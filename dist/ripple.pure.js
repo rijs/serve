@@ -208,8 +208,7 @@ var render = function (ripple) { return function (next) { return function (el) {
   return !node || !node.state ? undefined
        : (features
           .map(key('body'))
-          .map(function (d) { return d.call(node.shadowRoot || node, node.shadowRoot || node, node.state); })
-          , node)
+          .map(function (d) { return d.call(node.shadowRoot || node, node.shadowRoot || node, node.state); }), node)
 }; }; };
 
 var log = window.log('[ri/features]')
@@ -408,6 +407,7 @@ var pow = Math.pow;
 
 var connect = function (io, url) { return function () {
   var WebSocket = window.WebSocket;
+  var location = window.location;
   var setTimeout = window.setTimeout;
   var socket = new WebSocket(url);
   socket.onopen = function (d) { return io.emit('connected', socket); };
@@ -741,9 +741,7 @@ var binary = function (socket, blob, meta, start, blockSize) {
   var output = emitterify().on('recv')
       , next = function (id) { return function () { return start >= blob.size 
             ? output.emit('sent', { id: id })
-            : ( socket.send(blob.slice(start, start += blockSize))
-              , window.setTimeout(next(id))
-              ); }; };
+            : ( socket.send(blob.slice(start, start += blockSize)), window.setTimeout(next(id))); }; };
 
   send(socket, 'BINARY')({ size: blob.size, meta: meta })
     .on('sent', function (ref) {
@@ -840,7 +838,9 @@ var subscribe = function (ripple) { return function (name, k) {
   if (ripple.subscriptions[name][k])
     { output
       .on('start')
-      .map(function (o) { return o.send(key(k)(ripple(name))); }); }
+      .map(function () { return key(k)(ripple(name)); })
+      .filter(is.def)
+      .map(function (initial) { return output.next(initial); }); }
 
   var raw = ripple.subscriptions[name][k] = ripple.subscriptions[name][k] || ripple
     .send(name, 'SUBSCRIBE', k)
@@ -853,7 +853,7 @@ var subscribe = function (ripple) { return function (name, k) {
   return output
 }; };
 
-var upload = function (ripple) { return function (resource, form) {
+var upload = function (ripple) { return function (name, form) {
   var index = ++ripple.upload.id
     , fields = {}
     , size = 0
@@ -868,6 +868,8 @@ var upload = function (ripple) { return function (resource, form) {
           .send(blob, { filename: filename, field: field, i: i, index: index })
           .on('progress', function (ref) {
             var received = ref.received;
+            var total = ref.total;
+
             return output.emit('progress', {
             total: size
           , received: 
@@ -893,10 +895,10 @@ var upload = function (ripple) { return function (resource, form) {
   var output = ripple.send({ 
     files: files.length
   , type: 'PREUPLOAD'
-  , resource: resource
   , fields: fields
   , index: index
   , size: size 
+  , name: name
   }).once('sent', next);
 
   return output
@@ -1047,9 +1049,12 @@ var rijs_data = function data(ripple){
     .on('change.data')
     .filter(function (ref) {
       var name = ref[0];
+      var change = ref[1];
+
       return header$1('content-type', 'application/data')(ripple.resources[name]);
   })
     .filter(function (ref) {
+      var name = ref[0];
       var change = ref[1];
 
       return change && change.key;
@@ -1162,6 +1167,7 @@ var parse$1 = function (res) { return (res.body = fn$1(res.body), res); };
 var log$3   = window.log('[ri/types/fn]');
   
 var attr$1 = window.attr;
+var str$1 = window.str;
 var is$2 = window.is;
 var lo = window.lo;
 var fn$1 = window.fn;
