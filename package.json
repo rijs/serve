@@ -6,12 +6,9 @@
   "author": "Pedram Emrouznejad (https://github.com/pemrouz)",
   "repository": {
     "type": "git",
-    "url": "git://github.com/rijs/db.git"
+    "url": "git://github.com/rijs/serve.git"
   },
   "scripts": {
-    "copy": "cp ./node_modules/rijs/ripple* ./dist",
-    "clean": "rm -rf dist && mkdir dist",
-    "build": "npm run clean && npm run copy",
     "test": "istanbul test ./node_modules/mocha/bin/_mocha --report html -- -R spec",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && rm -rf ./coverage",
     "cov": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec",
