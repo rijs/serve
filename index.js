@@ -1,7 +1,7 @@
 // -------------------------------------------
 // Serves the client library /ripple.js
 // -------------------------------------------
-module.exports = function serve(ripple, { server, serve = __dirname, client = 'ripple' } = {}){
+module.exports = function serve(ripple, { server, serve, client = 'ripple' } = {}){
   log('creating')
   const { http = server } = ripple.server || {}
   if (!http) return ripple

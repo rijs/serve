@@ -1,6 +1,6 @@
 {
   "name": "rijs.serve",
-  "version": "0.8.5",
+  "version": "1.0.0",
   "main": "index",
   "browser": "./node_modules/utilise/identity.js",
   "author": "Pedram Emrouznejad (https://github.com/pemrouz)",
@@ -12,7 +12,7 @@
     "test": "istanbul test ./node_modules/mocha/bin/_mocha --report html -- -R spec",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && rm -rf ./coverage",
     "cov": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec",
-    "version": "npm run build && git add -A",
+    "version": "git add -A",
     "postversion": "git push && git push --tags"
   },
   "license": "pemrouz.mit-license.org",
