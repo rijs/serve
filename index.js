@@ -9,7 +9,7 @@ module.exports = function serve(ripple, { server, serve, client = 'ripple' } = {
       , path = local(serve, client)
       , compress = compression()
 
-  app.use(`/${client}.js`, compress, send(path('js')))
+  app.use(`/${client}.js`, compress, send(path('bundle.js')))
   app.use(`/${client}.min.js`, compress, send(path('min.js')))
   return ripple
 }
