@@ -9,7 +9,8 @@ module.exports = function serve(ripple, { server, serve, client = 'ripple' } = {
       , path = local(serve, client)
       , compress = compression()
 
-  app.use(`/${client}.js`, compress, send(path('bundle.js')))
+  app.use(`/${client}.js`, compress, send(path(prod ? 'min.js' : 'bundle.js')))
+  app.use(`/${client}.bundle.js`, compress, send(path('bundle.js')))
   app.use(`/${client}.min.js`, compress, send(path('min.js')))
   return ripple
 }
@@ -26,3 +27,5 @@ const compression = require('compression')
     , { resolve } = require('path')
     , express = require('express')
     , log = require('utilise/log')('[ri/serve]')
+    , lo = require('utilise/lo')
+    , prod = lo(process.env.NODE_ENV) == 'production'
