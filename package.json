@@ -20,14 +20,14 @@
     "chai": "*",
     "coveralls": "*",
     "istanbul": "*",
-    "mocha": "^5.1.0",
+    "mocha": "^5.1.1",
     "mocha-lcov-reporter": "*",
-    "rijs": "*",
+    "rijs": "^0.9.1",
     "supertest": "^1.0.1"
   },
   "dependencies": {
     "compression": "^1.7.2",
     "express": "^4.16.3",
-    "utilise": "^2.3.3"
+    "utilise": "^2.3.5"
   }
 }
